@@ -22,19 +22,23 @@ interface Prediction {
 
 interface PredictionCardProps {
   prediction: Prediction;
+  onSelect: (prediction: Prediction) => void;
 }
 
-export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) => {
+export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, onSelect }) => {
   const { matches, confidence_score, market, prediction_value, is_banker } = prediction;
   
   const matchDate = new Date(matches.match_date);
   const isLive = matches.status !== 'NS' && matches.status !== 'FT';
 
   return (
-    <div className={cn(
-      "card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group relative overflow-hidden",
-      is_banker ? "border-accent-green/50 shadow-[0_0_15px_rgba(0,230,118,0.1)]" : ""
-    )}>
+    <div 
+      onClick={() => onSelect(prediction)}
+      className={cn(
+        "card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group relative overflow-hidden cursor-pointer border-primary-border/60 hover:border-accent-green/40",
+        is_banker ? "border-accent-green/50 shadow-[0_0_15px_rgba(0,230,118,0.1)]" : ""
+      )}
+    >
       {is_banker && (
         <div className="absolute top-0 right-0 bg-accent-green text-[#0D1B2A] text-[10px] font-bold px-3 py-1 rounded-bl-lg tracking-wider uppercase">
           Banker
@@ -53,9 +57,9 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) =>
             )}
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-lg font-bold">{matches.home_team}</span>
+            <span className="text-lg font-bold text-white group-hover:text-accent-green transition-colors">{matches.home_team}</span>
             <span className="text-sm text-text-secondary">vs</span>
-            <span className="text-lg font-bold">{matches.away_team}</span>
+            <span className="text-lg font-bold text-white group-hover:text-accent-green transition-colors">{matches.away_team}</span>
           </div>
         </div>
         
@@ -72,15 +76,16 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) =>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-text-secondary mb-1 flex items-center justify-end gap-1">
+          <div className="text-xs text-text-secondary mb-2 flex items-center justify-end gap-1">
             <Clock size={12} />
             {matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
-          <button className="text-xs font-semibold bg-primary-card border border-primary-border px-3 py-1.5 rounded hover:bg-accent-green hover:text-[#0D1B2A] hover:border-accent-green transition-colors">
-            Add to Slip
+          <button className="text-xs font-semibold bg-[#28374D]/40 border border-primary-border px-3 py-1.5 rounded text-white group-hover:bg-accent-green group-hover:text-[#0D1B2A] group-hover:border-accent-green transition-colors">
+            View AI Report
           </button>
         </div>
       </div>
     </div>
   );
 };
+

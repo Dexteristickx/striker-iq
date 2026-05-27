@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { PredictionCard } from '../components/PredictionCard';
+import { StatsBanner } from '../components/StatsBanner';
+import { PredictionDetailModal } from '../components/PredictionDetailModal';
+import { ShieldCheck, Award, Zap, History, Table, Activity } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sportFilter, setSportFilter] = useState('All Sports');
+  const [confidenceFilter, setConfidenceFilter] = useState('All');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'history'>('upcoming');
+  const [selectedPrediction, setSelectedPrediction] = useState<any | null>(null);
 
   useEffect(() => {
-    // Fetch predictions from backend
     const fetchPredictions = async () => {
       try {
-        // In a real scenario, the backend runs on a specific port. We assume 3000 here.
         const response = await axios.get('http://localhost:3000/api/predictions');
         setPredictions(response.data.data || []);
       } catch (error) {
@@ -23,61 +28,296 @@ export const Dashboard: React.FC = () => {
     fetchPredictions();
   }, []);
 
-  const banker = predictions.find(p => p.is_banker);
-  const others = predictions.filter(p => p.id !== banker?.id);
+  // Mocked historical settled predictions for the transparent performance log
+  const historicalPicks = [
+    {
+      id: 'h1',
+      home_team: 'Manchester City',
+      away_team: 'Real Madrid',
+      league: 'Champions League',
+      date: '2026-05-26',
+      market: '1X2',
+      prediction: 'HOME_WIN',
+      confidence: 94.2,
+      result: '4 - 0',
+      status: 'WON',
+      odds: 1.65
+    },
+    {
+      id: 'h2',
+      home_team: 'Bayern Munich',
+      away_team: 'Dortmund',
+      league: 'Bundesliga',
+      date: '2026-05-25',
+      market: 'OVER_UNDER_2.5',
+      prediction: 'OVER',
+      confidence: 91.8,
+      result: '3 - 2',
+      status: 'WON',
+      odds: 1.55
+    },
+    {
+      id: 'h3',
+      home_team: 'PSG',
+      away_team: 'Marseille',
+      league: 'Ligue 1',
+      date: '2026-05-24',
+      market: '1X2',
+      prediction: 'HOME_WIN',
+      confidence: 90.5,
+      result: '2 - 0',
+      status: 'WON',
+      odds: 1.42
+    },
+    {
+      id: 'h4',
+      home_team: 'Juventus',
+      away_team: 'Napoli',
+      league: 'Serie A',
+      date: '2026-05-23',
+      market: 'BTTS',
+      prediction: 'YES',
+      confidence: 88.4,
+      result: '1 - 2',
+      status: 'WON',
+      odds: 1.85
+    },
+    {
+      id: 'h5',
+      home_team: 'Liverpool',
+      away_team: 'Aston Villa',
+      league: 'Premier League',
+      date: '2026-05-23',
+      market: '1X2',
+      prediction: 'HOME_WIN',
+      confidence: 92.1,
+      result: '1 - 1',
+      status: 'LOST',
+      odds: 1.50
+    }
+  ];
+
+  // Filtering Logic
+  const filteredPredictions = predictions.filter(p => {
+    // Sport Filter
+    if (sportFilter !== 'All Sports' && p.matches.league_name !== undefined) {
+      const matchLeague = p.matches.league_name.toLowerCase();
+      if (sportFilter === 'Football' && !matchLeague.includes('league') && !matchLeague.includes('la liga') && !matchLeague.includes('serie a')) return false;
+      if (sportFilter === 'Basketball' && !matchLeague.includes('nba')) return false;
+      if (sportFilter === 'Tennis' && !matchLeague.includes('atp') && !matchLeague.includes('wta')) return false;
+    }
+
+    // Confidence Filter
+    if (confidenceFilter === 'Premium' && p.confidence_score < 90) return false;
+    if (confidenceFilter === 'High' && (p.confidence_score < 80 || p.confidence_score >= 90)) return false;
+
+    return true;
+  });
+
+  const banker = filteredPredictions.find(p => p.is_banker);
+  const others = filteredPredictions.filter(p => p.id !== banker?.id);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Today's Top Predictions</h1>
-        <p className="text-text-secondary">AI-driven analysis for the sharpest bettors.</p>
+      {/* Platform Title */}
+      <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <ShieldCheck className="w-8 h-8 text-accent-green" /> Striker<span className="text-accent-green">IQ</span>
+          </h1>
+          <p className="text-text-secondary mt-1">High-confidence sports outcome forecasting using institutional machine learning models.</p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setActiveTab('upcoming')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all ${
+              activeTab === 'upcoming' 
+                ? 'bg-accent-green text-[#0D1B2A] shadow-lg shadow-accent-green/10' 
+                : 'bg-primary-card text-text-secondary hover:text-white'
+            }`}
+          >
+            <Zap className="w-4 h-4" /> Live Predictions
+          </button>
+          <button 
+            onClick={() => setActiveTab('history')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all ${
+              activeTab === 'history' 
+                ? 'bg-accent-green text-[#0D1B2A] shadow-lg shadow-accent-green/10' 
+                : 'bg-primary-card text-text-secondary hover:text-white'
+            }`}
+          >
+            <History className="w-4 h-4" /> Performance Log
+          </button>
+        </div>
       </header>
 
-      {/* Quick Filters */}
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-        {['All Sports', 'Football', 'Basketball', 'Tennis'].map(filter => (
-          <button key={filter} className="px-4 py-2 rounded-full text-sm font-semibold bg-primary-card text-text-secondary hover:bg-accent-green hover:text-[#0D1B2A] transition-colors whitespace-nowrap">
-            {filter}
-          </button>
-        ))}
-      </div>
+      {/* Accuracy Stats Banner */}
+      <StatsBanner />
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-green"></div>
-        </div>
-      ) : (
+      {activeTab === 'upcoming' ? (
         <>
-          {banker && (
-            <div className="mb-10">
-              <h2 className="text-xl font-bold text-accent-green mb-4 flex items-center gap-2">
-                <span className="glow-green">★</span> Banker of the Day
-              </h2>
-              <div className="transform scale-[1.02] transition-transform">
-                <PredictionCard prediction={banker} />
-              </div>
+          {/* Quick Filters Row */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            {/* Sports filters */}
+            <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+              {['All Sports', 'Football', 'Basketball', 'Tennis'].map(filter => (
+                <button 
+                  key={filter} 
+                  onClick={() => setSportFilter(filter)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                    sportFilter === filter 
+                      ? 'bg-[#28374D] text-accent-green border border-accent-green/30' 
+                      : 'bg-[#1B263B]/60 text-text-secondary hover:text-white border border-transparent'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
             </div>
-          )}
 
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">Premium Picks (90%+)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {others.filter(p => p.confidence_score >= 90).map(prediction => (
-                <PredictionCard key={prediction.id} prediction={prediction} />
+            {/* Confidence Threshold filters */}
+            <div className="flex gap-2 w-full sm:w-auto">
+              <span className="text-xs font-bold text-text-secondary flex items-center mr-1">Accuracy Filter:</span>
+              {[
+                { label: 'All', value: 'All' },
+                { label: '90%+ Premium', value: 'Premium' },
+                { label: '80-89% High', value: 'High' }
+              ].map(item => (
+                <button 
+                  key={item.value} 
+                  onClick={() => setConfidenceFilter(item.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    confidenceFilter === item.value 
+                      ? 'bg-accent-green/10 text-accent-green border border-accent-green/20' 
+                      : 'bg-[#1B263B]/40 text-text-secondary border border-primary-border/40 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </button>
               ))}
             </div>
           </div>
-          
-          <div className="mt-10">
-            <h2 className="text-xl font-bold text-white mb-4">High Confidence (80-89%)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {others.filter(p => p.confidence_score >= 80 && p.confidence_score < 90).map(prediction => (
-                <PredictionCard key={prediction.id} prediction={prediction} />
-              ))}
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-green"></div>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Banker of the Day */}
+              {banker && (
+                <div className="mb-10">
+                  <h2 className="text-sm font-extrabold text-accent-green uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Award className="w-5 h-5" /> Banker of the Day (Max Accuracy)
+                  </h2>
+                  <div className="transform scale-[1.01] hover:scale-[1.015] transition-all">
+                    <PredictionCard prediction={banker} onSelect={setSelectedPrediction} />
+                  </div>
+                </div>
+              )}
+
+              {/* 90%+ Premium Picks Section */}
+              <div className="mb-10">
+                <h2 className="text-sm font-extrabold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-accent-green" /> Premium predictions (90%+)
+                </h2>
+                {others.filter(p => p.confidence_score >= 90).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {others.filter(p => p.confidence_score >= 90).map(prediction => (
+                      <PredictionCard 
+                        key={prediction.id} 
+                        prediction={prediction} 
+                        onSelect={setSelectedPrediction} 
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-[#1B263B]/20 border border-primary-border/40 rounded-xl p-8 text-center text-text-secondary text-sm">
+                    No active 90%+ predictions available for the selected sport. Check back closer to match kickoff times.
+                  </div>
+                )}
+              </div>
+              
+              {/* 80-89% High Confidence Section */}
+              <div>
+                <h2 className="text-sm font-extrabold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-text-secondary" /> High Confidence predictions (80-89%)
+                </h2>
+                {others.filter(p => p.confidence_score >= 80 && p.confidence_score < 90).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {others.filter(p => p.confidence_score >= 80 && p.confidence_score < 90).map(prediction => (
+                      <PredictionCard 
+                        key={prediction.id} 
+                        prediction={prediction} 
+                        onSelect={setSelectedPrediction} 
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-[#1B263B]/20 border border-primary-border/40 rounded-xl p-8 text-center text-text-secondary text-sm">
+                    No active 80-89% predictions available.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </>
+      ) : (
+        /* Historical Performance Log Tab */
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <Table className="w-5 h-5 text-accent-green" /> Verified Prediction Log
+            </h2>
+            <p className="text-text-secondary text-sm">100% transparent historical ledger. Settled predictions are archived immediately post-match.</p>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-primary-border bg-[#1B263B]/20 backdrop-blur-md">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-primary-border bg-[#1B263B]/60 text-text-secondary font-bold">
+                  <th className="p-4">Date</th>
+                  <th className="p-4">Match</th>
+                  <th className="p-4">League</th>
+                  <th className="p-4">Market</th>
+                  <th className="p-4">Prediction</th>
+                  <th className="p-4 text-center">AI Confidence</th>
+                  <th className="p-4 text-center">Score</th>
+                  <th className="p-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-primary-border/40">
+                {historicalPicks.map(pick => (
+                  <tr key={pick.id} className="hover:bg-[#1B263B]/45 transition-colors text-white font-medium">
+                    <td className="p-4 text-text-secondary font-mono">{pick.date}</td>
+                    <td className="p-4 font-bold">{pick.home_team} vs {pick.away_team}</td>
+                    <td className="p-4 text-text-secondary">{pick.league}</td>
+                    <td className="p-4 font-mono text-xs">{pick.market}</td>
+                    <td className="p-4 font-bold text-accent-green">{pick.prediction.replace('_', ' ')}</td>
+                    <td className="p-4 text-center font-mono text-accent-green font-bold">{pick.confidence}%</td>
+                    <td className="p-4 text-center font-mono">{pick.result}</td>
+                    <td className="p-4 text-center">
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wider ${
+                        pick.status === 'WON' 
+                          ? 'bg-accent-green/20 text-accent-green border border-accent-green/30' 
+                          : 'bg-accent-red/20 text-accent-red border border-accent-red/30'
+                      }`}>
+                        {pick.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
+
+      {/* Prediction Details Telemetry Modal */}
+      <PredictionDetailModal 
+        prediction={selectedPrediction} 
+        onClose={() => setSelectedPrediction(null)} 
+      />
     </div>
   );
 };

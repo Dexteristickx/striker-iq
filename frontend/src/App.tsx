@@ -11,8 +11,11 @@ function App() {
             <span className="text-xl font-bold tracking-tight text-white">Striker<span className="text-accent-green">IQ</span></span>
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-text-secondary hover:text-white transition-colors text-sm font-semibold">Betslip</button>
-            <button className="bg-primary-border px-4 py-2 rounded text-sm font-semibold hover:bg-white hover:text-primary transition-colors">Sign In</button>
+            <span className="text-accent-green bg-accent-green/10 border border-accent-green/20 px-2 py-1 rounded text-xs font-bold font-mono">
+              90%+ WIN FILTER ACTIVE
+            </span>
+            <button className="text-text-secondary hover:text-white transition-colors text-sm font-semibold">Performance Ledger</button>
+            <button className="bg-primary-border px-4 py-2 rounded text-sm font-semibold hover:bg-white hover:text-primary transition-colors text-white">Sign In</button>
           </div>
         </div>
       </nav>
