@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import { ConfidenceMeter } from './ConfidenceMeter';
-import { Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface Prediction {
@@ -25,7 +25,7 @@ interface PredictionCardProps {
 }
 
 export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) => {
-  const { matches, confidence_score, market, prediction_value, is_banker, is_premium } = prediction;
+  const { matches, confidence_score, market, prediction_value, is_banker } = prediction;
   
   const matchDate = new Date(matches.match_date);
   const isLive = matches.status !== 'NS' && matches.status !== 'FT';
