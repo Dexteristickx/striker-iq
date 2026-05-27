@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #0D1B2A;
+    --bg-secondary: #1B263B;
+    --bg-card: #28374D;
+    
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    
+    --accent-green: #00E676;
+    --accent-red: #EF4444;
+    --accent-amber: #F59E0B;
+  }
+  
+  body {
+    @apply bg-[#0D1B2A] text-[#F8FAFC] antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-[#1B263B] rounded-xl border border-[#28374D] shadow-lg overflow-hidden;
+  }
+  
+  .badge {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  
+  .badge-success {
+    @apply bg-[#00E676]/20 text-[#00E676] border border-[#00E676]/30;
+  }
+  
+  .badge-warning {
+    @apply bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/30;
+  }
+  
+  .badge-danger {
+    @apply bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30;
+  }
+
+  .glass-panel {
+    @apply bg-[#1B263B]/60 backdrop-blur-md border border-[#F8FAFC]/10;
+  }
+}
+
+@layer utilities {
+  .glow-green {
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+  }
+}

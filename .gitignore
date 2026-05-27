@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.DS_Store
+ml-service/venv/
+ml-service/__pycache__/
+*.log
