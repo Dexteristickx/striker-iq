@@ -7,3 +7,5 @@ build/
 ml-service/venv/
 ml-service/__pycache__/
 *.log
+
+.vercel

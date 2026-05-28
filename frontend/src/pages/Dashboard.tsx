@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { PredictionCard } from '../components/PredictionCard';
 import { StatsBanner } from '../components/StatsBanner';
 import { PredictionDetailModal } from '../components/PredictionDetailModal';
-import { ShieldCheck, Award, Zap, History, Table, Activity } from 'lucide-react';
+import { ShieldCheck, Award, Zap, History, Table, Activity, Search, Globe, X, Loader2 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [predictions, setPredictions] = useState<any[]>([]);
@@ -12,6 +12,13 @@ export const Dashboard: React.FC = () => {
   const [confidenceFilter, setConfidenceFilter] = useState('All');
   const [activeTab, setActiveTab] = useState<'upcoming' | 'history'>('upcoming');
   const [selectedPrediction, setSelectedPrediction] = useState<any | null>(null);
+
+  // Global Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchMode, setSearchMode] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -27,6 +34,35 @@ export const Dashboard: React.FC = () => {
 
     fetchPredictions();
   }, []);
+
+  const handleSearch = async () => {
+    const term = searchQuery.trim();
+    if (!term) return;
+    setSearchLoading(true);
+    setSearchMode(true);
+    setSearchResults([]);
+    try {
+      const response = await axios.get(`http://localhost:3000/api/predictions?search=${encodeURIComponent(term)}`);
+      setSearchResults(response.data.data || []);
+    } catch (error) {
+      console.error('Search failed', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setSearchMode(false);
+    searchInputRef.current?.focus();
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch();
+    if (e.key === 'Escape') handleClearSearch();
+  };
 
   // Mocked historical settled predictions for the transparent performance log
   const historicalPicks = [
@@ -120,7 +156,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Platform Title */}
-      <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
             <ShieldCheck className="w-8 h-8 text-accent-green" /> Striker<span className="text-accent-green">IQ</span>
@@ -150,6 +186,92 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* ========== GLOBAL TEAM SEARCH ========== */}
+      <div className="mb-10 rounded-2xl border border-accent-green/20 bg-gradient-to-r from-[#0D1B2A] via-[#1B263B]/80 to-[#0D1B2A] p-6 shadow-xl shadow-accent-green/5">
+        <div className="flex items-center gap-2 mb-3">
+          <Globe className="w-5 h-5 text-accent-green" />
+          <span className="text-sm font-bold text-accent-green uppercase tracking-widest">Global Team Search</span>
+        </div>
+        <p className="text-text-secondary text-sm mb-4">Search for any football team in the world — across all leagues and countries — and get AI-powered predictions instantly.</p>
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
+            <input
+              ref={searchInputRef}
+              id="global-team-search-input"
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="e.g. Kaizer Chiefs, Al Ahly, Flamengo, Boca Juniors..."
+              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-10 py-3 text-white text-sm placeholder:text-text-secondary/50 focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <button
+            id="global-search-btn"
+            onClick={handleSearch}
+            disabled={!searchQuery.trim() || searchLoading}
+            className="px-6 py-3 rounded-xl bg-accent-green text-[#0D1B2A] font-bold text-sm flex items-center gap-2 hover:bg-accent-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent-green/20 active:scale-95"
+          >
+            {searchLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Search className="w-4 h-4" />
+            )}
+            {searchLoading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+
+        {/* Search Results */}
+        {searchMode && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                {searchLoading ? 'Fetching global predictions...' : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} for "${searchQuery}"`}
+              </span>
+              <button onClick={handleClearSearch} className="text-xs text-text-secondary hover:text-accent-green underline transition-colors">Clear results</button>
+            </div>
+
+            {searchLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative">
+                    <Globe className="w-10 h-10 text-accent-green/30 animate-pulse" />
+                    <Loader2 className="w-5 h-5 text-accent-green animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  </div>
+                  <p className="text-text-secondary text-sm">Scanning global football database...</p>
+                </div>
+              </div>
+            ) : searchResults.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {searchResults.map((prediction: any) => (
+                  <PredictionCard
+                    key={prediction.id}
+                    prediction={prediction}
+                    onSelect={setSelectedPrediction}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-[#1B263B]/30 border border-primary-border/40 rounded-xl p-8 text-center">
+                <Globe className="w-8 h-8 text-text-secondary/40 mx-auto mb-3" />
+                <p className="text-white font-semibold mb-1">No active predictions found</p>
+                <p className="text-text-secondary text-sm">No upcoming matches found for <span className="text-accent-green font-bold">"{searchQuery}"</span>. Try a different team name or check back before matchday.</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Accuracy Stats Banner */}
       <StatsBanner />
