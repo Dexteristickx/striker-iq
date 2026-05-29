@@ -170,142 +170,149 @@ export const Dashboard: React.FC = () => {
   const others = filteredPredictions.filter(p => p.id !== banker?.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-5 sm:py-8">
       {/* Platform Title */}
-      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <ShieldCheck className="w-8 h-8 text-accent-green" /> Striker<span className="text-accent-green">IQ</span>
+      <header className="mb-6 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-accent-green shrink-0" />
+            Striker<span className="text-accent-green">IQ</span>
           </h1>
-          <p className="text-text-secondary mt-1">High-confidence sports outcome forecasting using institutional machine learning models.</p>
+          <p className="text-text-secondary text-xs sm:text-sm mt-0.5 hidden sm:block">High-confidence sports outcome forecasting using institutional machine learning models.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 shrink-0">
           <button 
             onClick={() => setActiveTab('upcoming')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all ${
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'upcoming' 
-                ? 'bg-accent-green text-[#0D1B2A] shadow-lg shadow-accent-green/10' 
-                : 'bg-primary-card text-text-secondary hover:text-white'
+                ? 'bg-accent-green text-[#0D1B2A]' 
+                : 'bg-primary-card text-text-secondary'
             }`}
           >
-            <Zap className="w-4 h-4" /> Live Predictions
+            <Zap className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Live Predictions</span>
+            <span className="sm:hidden">Live</span>
           </button>
           <button 
             onClick={() => setActiveTab('history')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all ${
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'history' 
-                ? 'bg-accent-green text-[#0D1B2A] shadow-lg shadow-accent-green/10' 
-                : 'bg-primary-card text-text-secondary hover:text-white'
+                ? 'bg-accent-green text-[#0D1B2A]' 
+                : 'bg-primary-card text-text-secondary'
             }`}
           >
-            <History className="w-4 h-4" /> Performance Log
+            <History className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Performance Log</span>
+            <span className="sm:hidden">History</span>
           </button>
         </div>
       </header>
 
       {/* ========== GLOBAL TEAM SEARCH ========== */}
-      <div className="mb-10 rounded-2xl border border-accent-green/20 bg-gradient-to-r from-[#0D1B2A] via-[#1B263B]/80 to-[#0D1B2A] p-6 shadow-xl shadow-accent-green/5">
-        <div className="flex items-center gap-2 mb-3">
-          <Globe className="w-5 h-5 text-accent-green" />
-          <span className="text-sm font-bold text-accent-green uppercase tracking-widest">Global Team Search</span>
+      <div className="mb-6 rounded-xl border border-accent-green/20 bg-gradient-to-br from-[#0D1B2A] via-[#1B263B]/80 to-[#0D1B2A] p-4 sm:p-6 shadow-xl shadow-accent-green/5">
+        <div className="flex items-center gap-2 mb-2">
+          <Globe className="w-4 h-4 text-accent-green" />
+          <span className="text-xs font-bold text-accent-green uppercase tracking-widest">Global Team Search</span>
         </div>
-        <p className="text-text-secondary text-sm mb-5">Search any team, league or country worldwide. Filter by date to see all matches being played that day — across every division.</p>
+        <p className="text-text-secondary text-xs sm:text-sm mb-4 hidden sm:block">Search any team, league or country worldwide. Filter by date to see all matches being played that day — across every division.</p>
 
-        {/* Row 1: Team search */}
-        <div className="flex gap-3 mb-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
-            <input
-              ref={searchInputRef}
-              id="global-team-search-input"
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Team name e.g. Kaizer Chiefs, Al Ahly, Flamengo… (optional)"
-              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-10 py-3 text-white text-sm placeholder:text-text-secondary/50 focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white transition-colors"
-                aria-label="Clear team search"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+        {/* Team search input */}
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
+          <input
+            ref={searchInputRef}
+            id="global-team-search-input"
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Search team or league (optional)"
+            className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-lg pl-9 pr-9 py-2.5 text-white text-sm placeholder:text-text-secondary/50 focus:outline-none focus:border-accent-green/60 transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Row 2: Country + Date + Button */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Country selector */}
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
+        {/* Country + Date (side by side on all screens) */}
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-secondary pointer-events-none" />
             <select
               id="search-country-select"
               value={searchCountry}
               onChange={e => setSearchCountry(e.target.value)}
-              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all appearance-none cursor-pointer"
+              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-lg pl-8 pr-2 py-2.5 text-xs focus:outline-none focus:border-accent-green/60 transition-all appearance-none cursor-pointer"
               style={{ color: searchCountry ? 'white' : '#64748b' }}
             >
-              <option value="">All Countries / Competitions</option>
+              <option value="">All Countries</option>
               {COUNTRIES.map(c => (
                 <option key={c} value={c} style={{ color: 'white', background: '#0D1B2A' }}>{c}</option>
               ))}
             </select>
           </div>
-
-          {/* Date picker */}
-          <div className="relative flex-1">
-            <CalendarDays className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none z-10" />
+          <div className="relative">
+            <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-secondary pointer-events-none z-10" />
             <input
               id="search-date-input"
               type="date"
               value={searchDate}
               onChange={e => setSearchDate(e.target.value)}
-              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all cursor-pointer [color-scheme:dark]"
+              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-lg pl-8 pr-2 py-2.5 text-white text-xs focus:outline-none focus:border-accent-green/60 transition-all cursor-pointer [color-scheme:dark]"
             />
           </div>
-
-          {/* Search button */}
-          <button
-            id="global-search-btn"
-            onClick={handleSearch}
-            disabled={searchLoading}
-            className="px-7 py-3 rounded-xl bg-accent-green text-[#0D1B2A] font-bold text-sm flex items-center gap-2 hover:bg-accent-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent-green/20 active:scale-95 whitespace-nowrap"
-          >
-            {searchLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Search className="w-4 h-4" />
-            )}
-            {searchLoading ? 'Searching...' : 'Search'}
-          </button>
         </div>
 
+        {/* Search button – full width on mobile */}
+        <button
+          id="global-search-btn"
+          onClick={handleSearch}
+          disabled={searchLoading}
+          className="w-full py-3 rounded-lg bg-accent-green text-[#0D1B2A] font-bold text-sm flex items-center justify-center gap-2 hover:bg-accent-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent-green/20 active:scale-[0.98]"
+        >
+          {searchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+          {searchLoading ? 'Searching...' : 'Get Predictions'}
+        </button>
         {/* Search Results */}
         {searchMode && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                {searchLoading ? 'Fetching global predictions...' : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} for "${searchQuery}"`}
-              </span>
-              <button onClick={handleClearSearch} className="text-xs text-text-secondary hover:text-accent-green underline transition-colors">Clear results</button>
+          <div className="mt-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                  {searchLoading ? 'Searching...' : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
+                </span>
+                {!searchLoading && searchCountry && (
+                  <span className="flex items-center gap-1 text-[10px] bg-accent-green/10 text-accent-green border border-accent-green/20 rounded-full px-2 py-0.5 font-bold">
+                    <MapPin className="w-2.5 h-2.5" />{searchCountry}
+                  </span>
+                )}
+                {!searchLoading && searchDate && (
+                  <span className="flex items-center gap-1 text-[10px] bg-[#28374D] text-white border border-primary-border/40 rounded-full px-2 py-0.5 font-bold">
+                    <CalendarDays className="w-2.5 h-2.5" />
+                    {new Date(searchDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  </span>
+                )}
+              </div>
+              <button onClick={handleClearSearch} className="text-xs text-text-secondary hover:text-accent-green underline transition-colors">Clear</button>
             </div>
 
             {searchLoading ? (
-              <div className="flex justify-center items-center py-12">
+              <div className="flex justify-center items-center py-10">
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative">
-                    <Globe className="w-10 h-10 text-accent-green/30 animate-pulse" />
-                    <Loader2 className="w-5 h-5 text-accent-green animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    <Globe className="w-9 h-9 text-accent-green/30 animate-pulse" />
+                    <Loader2 className="w-4 h-4 text-accent-green animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                   </div>
-                  <p className="text-text-secondary text-sm">Scanning global football database...</p>
+                  <p className="text-text-secondary text-xs">Scanning global football database...</p>
                 </div>
               </div>
             ) : searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {searchResults.map((prediction: any) => (
                   <PredictionCard
                     key={prediction.id}
@@ -315,10 +322,10 @@ export const Dashboard: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-[#1B263B]/30 border border-primary-border/40 rounded-xl p-8 text-center">
-                <Globe className="w-8 h-8 text-text-secondary/40 mx-auto mb-3" />
-                <p className="text-white font-semibold mb-1">No active predictions found</p>
-                <p className="text-text-secondary text-sm">No upcoming matches found for <span className="text-accent-green font-bold">"{searchQuery}"</span>. Try a different team name or check back before matchday.</p>
+              <div className="bg-[#1B263B]/30 border border-primary-border/40 rounded-xl p-6 text-center">
+                <Globe className="w-7 h-7 text-text-secondary/40 mx-auto mb-2" />
+                <p className="text-white font-semibold text-sm mb-1">No predictions found</p>
+                <p className="text-text-secondary text-xs">Try a different country, date, or team name.</p>
               </div>
             )}
           </div>
@@ -330,46 +337,39 @@ export const Dashboard: React.FC = () => {
 
       {activeTab === 'upcoming' ? (
         <>
-          {/* Quick Filters Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            {/* Sports filters */}
-            <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-              {['All Sports', 'Football', 'Basketball', 'Tennis'].map(filter => (
-                <button 
-                  key={filter} 
-                  onClick={() => setSportFilter(filter)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-                    sportFilter === filter 
-                      ? 'bg-[#28374D] text-accent-green border border-accent-green/30' 
-                      : 'bg-[#1B263B]/60 text-text-secondary hover:text-white border border-transparent'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-
-            {/* Confidence Threshold filters */}
-            <div className="flex gap-2 w-full sm:w-auto">
-              <span className="text-xs font-bold text-text-secondary flex items-center mr-1">Accuracy Filter:</span>
-              {[
-                { label: 'All', value: 'All' },
-                { label: '90%+ Premium', value: 'Premium' },
-                { label: '80-89% High', value: 'High' }
-              ].map(item => (
-                <button 
-                  key={item.value} 
-                  onClick={() => setConfidenceFilter(item.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    confidenceFilter === item.value 
-                      ? 'bg-accent-green/10 text-accent-green border border-accent-green/20' 
-                      : 'bg-[#1B263B]/40 text-text-secondary border border-primary-border/40 hover:text-white'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+          {/* Quick Filters Row — single scrollable row on mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-6 scrollbar-hide">
+            {['All Sports', 'Football', 'Basketball', 'Tennis'].map(filter => (
+              <button 
+                key={filter} 
+                onClick={() => setSportFilter(filter)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                  sportFilter === filter 
+                    ? 'bg-[#28374D] text-accent-green border border-accent-green/30' 
+                    : 'bg-[#1B263B]/60 text-text-secondary border border-transparent'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+            <div className="w-px h-4 bg-primary-border/40 mx-1 shrink-0" />
+            {[
+              { label: 'All', value: 'All' },
+              { label: '90%+', value: 'Premium' },
+              { label: '80-89%', value: 'High' }
+            ].map(item => (
+              <button 
+                key={item.value} 
+                onClick={() => setConfidenceFilter(item.value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                  confidenceFilter === item.value 
+                    ? 'bg-accent-green/10 text-accent-green border border-accent-green/20' 
+                    : 'bg-[#1B263B]/40 text-text-secondary border border-primary-border/40'
+                }`}
+              >
+                {item.value === 'All' ? 'All Accuracy' : item.label}
+              </button>
+            ))}
           </div>
 
           {loading ? (

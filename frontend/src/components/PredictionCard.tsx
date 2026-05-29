@@ -65,10 +65,10 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, onSe
               </span>
             )}
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-lg font-bold text-white group-hover:text-accent-green transition-colors">{matches.home_team}</span>
-            <span className="text-sm text-text-secondary">vs</span>
-            <span className="text-lg font-bold text-white group-hover:text-accent-green transition-colors">{matches.away_team}</span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-base sm:text-lg font-bold text-white group-hover:text-accent-green transition-colors leading-tight">{matches.home_team}</span>
+            <span className="text-xs text-text-secondary">vs</span>
+            <span className="text-base sm:text-lg font-bold text-white group-hover:text-accent-green transition-colors leading-tight">{matches.away_team}</span>
           </div>
         </div>
         
@@ -77,21 +77,21 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, onSe
         </div>
       </div>
 
-      <div className="pt-4 border-t border-primary-border flex items-center justify-between gap-2">
-        <div>
-          <div className="text-xs text-text-secondary mb-1">Prediction</div>
-          <div className="font-semibold text-white text-sm">
+      <div className="pt-3 border-t border-primary-border flex items-end justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[10px] text-text-secondary mb-0.5 uppercase tracking-wider">Prediction</div>
+          <div className="font-semibold text-white text-xs sm:text-sm truncate">
             {market} · {prediction_value.replace(/_/g, ' ')}
           </div>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-xs mb-2 flex items-center justify-end gap-1">
-            <Clock size={11} className="text-text-secondary" />
+          <div className="text-[10px] mb-1.5 flex items-center justify-end gap-1">
+            <Clock size={10} className="text-text-secondary" />
             <span className="font-semibold text-white">{dateLabel}</span>
-            <span className="text-text-secondary/50">·</span>
+            <span className="text-text-secondary/40">·</span>
             <span className="text-text-secondary font-mono">{timeLabel}</span>
           </div>
-          <button className="text-xs font-semibold bg-[#28374D]/40 border border-primary-border px-3 py-1.5 rounded text-white group-hover:bg-accent-green group-hover:text-[#0D1B2A] group-hover:border-accent-green transition-colors">
+          <button className="text-[10px] sm:text-xs font-semibold bg-[#28374D]/40 border border-primary-border px-2.5 py-1.5 rounded text-white group-hover:bg-accent-green group-hover:text-[#0D1B2A] group-hover:border-accent-green transition-colors whitespace-nowrap">
             View AI Report
           </button>
         </div>
