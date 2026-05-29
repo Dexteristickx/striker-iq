@@ -3,7 +3,7 @@ import axios from 'axios';
 import { PredictionCard } from '../components/PredictionCard';
 import { StatsBanner } from '../components/StatsBanner';
 import { PredictionDetailModal } from '../components/PredictionDetailModal';
-import { ShieldCheck, Award, Zap, History, Table, Activity, Search, Globe, X, Loader2 } from 'lucide-react';
+import { ShieldCheck, Award, Zap, History, Table, Activity, Search, Globe, X, Loader2, CalendarDays, MapPin } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [predictions, setPredictions] = useState<any[]>([]);
@@ -15,10 +15,20 @@ export const Dashboard: React.FC = () => {
 
   // Global Search State
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchCountry, setSearchCountry] = useState('');
+  const [searchDate, setSearchDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchMode, setSearchMode] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const COUNTRIES = [
+    'England','Spain','Germany','Italy','France','Portugal','Netherlands',
+    'Brazil','Argentina','Colombia','Mexico','USA',
+    'Nigeria','South Africa','Ghana','Kenya','Egypt','Morocco',
+    'Saudi Arabia','Japan','Turkey','Russia','Ukraine','Belgium','Scotland',
+    'Champions League','Europa League'
+  ];
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -36,13 +46,17 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   const handleSearch = async () => {
-    const term = searchQuery.trim();
-    if (!term) return;
+    const hasInput = searchQuery.trim() || searchCountry || searchDate;
+    if (!hasInput) return;
     setSearchLoading(true);
     setSearchMode(true);
     setSearchResults([]);
     try {
-      const response = await axios.get(`http://localhost:3000/api/predictions?search=${encodeURIComponent(term)}`);
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) params.set('search', searchQuery.trim());
+      if (searchCountry) params.set('country', searchCountry);
+      if (searchDate) params.set('date', searchDate);
+      const response = await axios.get(`http://localhost:3000/api/predictions?${params.toString()}`);
       setSearchResults(response.data.data || []);
     } catch (error) {
       console.error('Search failed', error);
@@ -54,6 +68,8 @@ export const Dashboard: React.FC = () => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
+    setSearchCountry('');
+    setSearchDate(new Date().toISOString().slice(0, 10));
     setSearchResults([]);
     setSearchMode(false);
     searchInputRef.current?.focus();
@@ -193,8 +209,10 @@ export const Dashboard: React.FC = () => {
           <Globe className="w-5 h-5 text-accent-green" />
           <span className="text-sm font-bold text-accent-green uppercase tracking-widest">Global Team Search</span>
         </div>
-        <p className="text-text-secondary text-sm mb-4">Search for any football team in the world — across all leagues and countries — and get AI-powered predictions instantly.</p>
-        <div className="flex gap-3">
+        <p className="text-text-secondary text-sm mb-5">Search any team, league or country worldwide. Filter by date to see all matches being played that day — across every division.</p>
+
+        {/* Row 1: Team search */}
+        <div className="flex gap-3 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
             <input
@@ -204,24 +222,58 @@ export const Dashboard: React.FC = () => {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              placeholder="e.g. Kaizer Chiefs, Al Ahly, Flamengo, Boca Juniors..."
+              placeholder="Team name e.g. Kaizer Chiefs, Al Ahly, Flamengo… (optional)"
               className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-10 py-3 text-white text-sm placeholder:text-text-secondary/50 focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all"
             />
             {searchQuery && (
               <button
-                onClick={handleClearSearch}
+                onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-white transition-colors"
-                aria-label="Clear search"
+                aria-label="Clear team search"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
+        </div>
+
+        {/* Row 2: Country + Date + Button */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Country selector */}
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
+            <select
+              id="search-country-select"
+              value={searchCountry}
+              onChange={e => setSearchCountry(e.target.value)}
+              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all appearance-none cursor-pointer"
+              style={{ color: searchCountry ? 'white' : '#64748b' }}
+            >
+              <option value="">All Countries / Competitions</option>
+              {COUNTRIES.map(c => (
+                <option key={c} value={c} style={{ color: 'white', background: '#0D1B2A' }}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date picker */}
+          <div className="relative flex-1">
+            <CalendarDays className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none z-10" />
+            <input
+              id="search-date-input"
+              type="date"
+              value={searchDate}
+              onChange={e => setSearchDate(e.target.value)}
+              className="w-full bg-[#0D1B2A] border border-primary-border/60 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-accent-green/60 focus:ring-2 focus:ring-accent-green/10 transition-all cursor-pointer [color-scheme:dark]"
+            />
+          </div>
+
+          {/* Search button */}
           <button
             id="global-search-btn"
             onClick={handleSearch}
-            disabled={!searchQuery.trim() || searchLoading}
-            className="px-6 py-3 rounded-xl bg-accent-green text-[#0D1B2A] font-bold text-sm flex items-center gap-2 hover:bg-accent-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent-green/20 active:scale-95"
+            disabled={searchLoading}
+            className="px-7 py-3 rounded-xl bg-accent-green text-[#0D1B2A] font-bold text-sm flex items-center gap-2 hover:bg-accent-green/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent-green/20 active:scale-95 whitespace-nowrap"
           >
             {searchLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

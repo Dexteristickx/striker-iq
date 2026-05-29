@@ -11,6 +11,7 @@ interface Prediction {
     league_name: string;
     match_date: string;
     status: string;
+    country?: string;
   };
   confidence_score: number;
   market: string;
@@ -31,6 +32,9 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, onSe
   const matchDate = new Date(matches.match_date);
   const isLive = matches.status !== 'NS' && matches.status !== 'FT';
 
+  const dateLabel = matchDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const timeLabel = matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
   return (
     <div 
       onClick={() => onSelect(prediction)}
@@ -46,11 +50,16 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, onSe
       )}
 
       <div className="flex justify-between items-start mb-4">
-        <div>
-          <div className="text-xs text-text-secondary uppercase tracking-wider mb-1 flex items-center gap-1.5">
-            {matches.league_name}
+        <div className="flex-1 pr-2">
+          <div className="flex flex-wrap items-center gap-1.5 mb-1">
+            <span className="text-xs text-text-secondary uppercase tracking-wider">{matches.league_name}</span>
+            {matches.country && (
+              <span className="text-[10px] bg-[#28374D] text-text-secondary border border-primary-border/40 rounded-full px-2 py-0.5 font-medium">
+                {matches.country}
+              </span>
+            )}
             {isLive && (
-              <span className="flex items-center gap-1 text-accent-red font-bold">
+              <span className="flex items-center gap-1 text-accent-red font-bold text-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-red animate-pulse"></span>
                 LIVE
               </span>
@@ -63,22 +72,24 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({ prediction, onSe
           </div>
         </div>
         
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end shrink-0">
           <ConfidenceMeter score={confidence_score} size="md" />
         </div>
       </div>
 
-      <div className="pt-4 border-t border-primary-border flex items-center justify-between">
+      <div className="pt-4 border-t border-primary-border flex items-center justify-between gap-2">
         <div>
           <div className="text-xs text-text-secondary mb-1">Prediction</div>
-          <div className="font-semibold text-white flex items-center gap-2">
-            {market} - {prediction_value.replace('_', ' ')}
+          <div className="font-semibold text-white text-sm">
+            {market} · {prediction_value.replace(/_/g, ' ')}
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-text-secondary mb-2 flex items-center justify-end gap-1">
-            <Clock size={12} />
-            {matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        <div className="text-right shrink-0">
+          <div className="text-xs mb-2 flex items-center justify-end gap-1">
+            <Clock size={11} className="text-text-secondary" />
+            <span className="font-semibold text-white">{dateLabel}</span>
+            <span className="text-text-secondary/50">·</span>
+            <span className="text-text-secondary font-mono">{timeLabel}</span>
           </div>
           <button className="text-xs font-semibold bg-[#28374D]/40 border border-primary-border px-3 py-1.5 rounded text-white group-hover:bg-accent-green group-hover:text-[#0D1B2A] group-hover:border-accent-green transition-colors">
             View AI Report
