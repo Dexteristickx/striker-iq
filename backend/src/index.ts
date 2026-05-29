@@ -32,3 +32,5 @@ cron.schedule('0 */6 * * *', () => {
   console.log('Cron triggered: Syncing upcoming matches...');
   DataPipeline.syncUpcomingMatchesAndPredict();
 });
+
+export default app;

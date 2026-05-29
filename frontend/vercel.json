@@ -7,6 +7,6 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {
-    "VITE_API_BASE_URL": "https://striker-iq-backend.vercel.app"
+    "VITE_API_BASE_URL": "https://backend-nine-eta-13.vercel.app"
   }
 }
