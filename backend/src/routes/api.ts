@@ -163,7 +163,10 @@ function buildMockForCountry(
 apiRouter.get('/predictions', async (req, res) => {
   const search  = (req.query.search  as string || '').trim().toLowerCase();
   const country = (req.query.country as string || '').trim().toLowerCase();
-  const date    = (req.query.date    as string || '').trim(); // ISO date string YYYY-MM-DD
+  
+  // Default to today's date in local system/server time format YYYY-MM-DD
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const date    = (req.query.date    as string || todayStr).trim();
 
   try {
     const { data, error } = await supabase
@@ -210,60 +213,25 @@ apiRouter.get('/predictions', async (req, res) => {
     if (country) {
       mockData = buildMockForCountry(country, date, search);
     } else {
-      // Default global sample
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const baseDate = date ? new Date(date) : tomorrow;
+      // Return predictions across ALL countries/competitions automatically on landing/entry!
+      const allCountries = Object.keys(COUNTRY_LEAGUES);
+      for (const cKey of allCountries) {
+        let displayName = cKey.charAt(0).toUpperCase() + cKey.slice(1);
+        if (cKey === 'southafrica') displayName = 'South Africa';
+        else if (cKey === 'saudiarabia') displayName = 'Saudi Arabia';
+        else if (cKey === 'champions_league') displayName = 'Champions League';
+        else if (cKey === 'europa_league') displayName = 'Europa League';
 
-      const defaults = [
-        { home: 'Arsenal', away: 'Chelsea', league: 'Premier League', country: 'England' },
-        { home: 'Real Madrid', away: 'Barcelona', league: 'La Liga', country: 'Spain' },
-        { home: 'Bayern Munich', away: 'Dortmund', league: 'Bundesliga', country: 'Germany' },
-        { home: 'AC Milan', away: 'Inter', league: 'Serie A', country: 'Italy' },
-        { home: 'PSG', away: 'Marseille', league: 'Ligue 1', country: 'France' },
-        { home: 'Flamengo', away: 'Palmeiras', league: 'Brasileirao', country: 'Brazil' },
-        { home: 'Boca Juniors', away: 'River Plate', league: 'Primera División', country: 'Argentina' },
-        { home: 'Kaizer Chiefs', away: 'Orlando Pirates', league: 'DStv Premiership', country: 'South Africa' },
-        { home: 'Al Ahly', away: 'Zamalek', league: 'Egyptian Premier League', country: 'Egypt' },
-        { home: 'Gor Mahia', away: 'AFC Leopards', league: 'FKF Premier League', country: 'Kenya' },
-        { home: 'Asante Kotoko', away: 'Hearts of Oak', league: 'Ghana Premier League', country: 'Ghana' },
-        { home: 'Enyimba', away: 'Rivers United', league: 'NPFL', country: 'Nigeria' },
-      ];
-
-      let id = 1;
-      for (const d of defaults) {
-        if (search && !d.home.toLowerCase().includes(search) && !d.away.toLowerCase().includes(search) && !d.league.toLowerCase().includes(search) && !d.country.toLowerCase().includes(search)) {
-          continue;
-        }
-        const matchDate = new Date(baseDate);
-        matchDate.setHours(12 + Math.floor(Math.random() * 8), Math.random() > 0.5 ? 30 : 0, 0, 0);
-        const conf = randConf();
-        const market = MARKETS[Math.floor(Math.random() * MARKETS.length)];
-        const pred = PREDICTIONS[market][Math.floor(Math.random() * PREDICTIONS[market].length)];
-        mockData.push({
-          id: `global-${id++}`,
-          confidence_score: conf,
-          market,
-          prediction_value: pred,
-          is_banker: conf >= 95,
-          is_premium: conf >= 90,
-          matches: {
-            home_team: d.home,
-            away_team: d.away,
-            league_name: d.league,
-            country: d.country,
-            match_date: matchDate.toISOString(),
-            status: 'NS',
-          },
-        });
+        const countryData = buildMockForCountry(displayName, date, search);
+        mockData.push(...countryData);
       }
 
-      // If still empty (very specific team search not in defaults), generate dynamic
+      // If still empty (e.g. very specific team search that isn't in global leagues), generate dynamic
       if (mockData.length === 0 && search) {
         const teamName = search.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         const opponents = ['Bayern Munich', 'Real Madrid', 'Man City', 'PSG', 'Juventus', 'Liverpool'];
         const opponent = opponents[Math.floor(Math.random() * opponents.length)];
-        const matchDate = new Date(date || Date.now() + 86400000);
+        const matchDate = new Date(date || Date.now());
         matchDate.setHours(15, 0, 0, 0);
         const conf = Number((90 + Math.random() * 8).toFixed(1));
         mockData = [{
@@ -284,6 +252,9 @@ apiRouter.get('/predictions', async (req, res) => {
         }];
       }
     }
+
+    // Always sort by confidence_score descending so highest accuracy predictions rise to the top!
+    mockData.sort((a, b) => b.confidence_score - a.confidence_score);
 
     res.json({ data: mockData });
   }

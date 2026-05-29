@@ -5,6 +5,8 @@ import { StatsBanner } from '../components/StatsBanner';
 import { PredictionDetailModal } from '../components/PredictionDetailModal';
 import { ShieldCheck, Award, Zap, History, Table, Activity, Search, Globe, X, Loader2, CalendarDays, MapPin } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 export const Dashboard: React.FC = () => {
   const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/predictions');
+        const response = await axios.get(`${API_BASE}/api/predictions`);
         setPredictions(response.data.data || []);
       } catch (error) {
         console.error("Failed to load predictions", error);
@@ -56,7 +58,7 @@ export const Dashboard: React.FC = () => {
       if (searchQuery.trim()) params.set('search', searchQuery.trim());
       if (searchCountry) params.set('country', searchCountry);
       if (searchDate) params.set('date', searchDate);
-      const response = await axios.get(`http://localhost:3000/api/predictions?${params.toString()}`);
+      const response = await axios.get(`${API_BASE}/api/predictions?${params.toString()}`);
       setSearchResults(response.data.data || []);
     } catch (error) {
       console.error('Search failed', error);
