@@ -154,11 +154,8 @@ export const Dashboard: React.FC = () => {
   // Filtering Logic
   const filteredPredictions = predictions.filter(p => {
     // Sport Filter
-    if (sportFilter !== 'All Sports' && p.matches.league_name !== undefined) {
-      const matchLeague = p.matches.league_name.toLowerCase();
-      if (sportFilter === 'Football' && !matchLeague.includes('league') && !matchLeague.includes('la liga') && !matchLeague.includes('serie a')) return false;
-      if (sportFilter === 'Basketball' && !matchLeague.includes('nba')) return false;
-      if (sportFilter === 'Tennis' && !matchLeague.includes('atp') && !matchLeague.includes('wta')) return false;
+    if (sportFilter !== 'All Sports' && p.matches.sport !== undefined) {
+      if (sportFilter.toLowerCase() !== p.matches.sport.toLowerCase()) return false;
     }
 
     // Confidence Filter

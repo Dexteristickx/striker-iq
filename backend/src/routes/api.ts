@@ -148,6 +148,7 @@ function buildMockForCountry(
           country: country,
           match_date: matchDate.toISOString(),
           status: 'NS',
+          sport: 'football',
         },
       });
     }
@@ -178,7 +179,8 @@ apiRouter.get('/predictions', async (req, res) => {
           away_team,
           league_name,
           match_date,
-          status
+          status,
+          sport
         )
       `)
       .order('confidence_score', { ascending: false });
@@ -248,6 +250,7 @@ apiRouter.get('/predictions', async (req, res) => {
             country: 'International',
             match_date: matchDate.toISOString(),
             status: 'NS',
+            sport: 'football',
           },
         }];
       }

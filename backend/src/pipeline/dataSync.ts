@@ -6,10 +6,15 @@ export class DataPipeline {
   static async syncUpcomingMatchesAndPredict() {
     console.log('[Pipeline] Starting sync pipeline for upcoming matches...');
     
-    // 1. Fetch upcoming matches (using Premier League ID 39 as default for now)
-    const fixtures = await FootballApiService.getUpcomingFixtures(39, 2);
+    // Major Leagues to sync: Premier League (39), La Liga (140), Bundesliga (78), Serie A (135), Ligue 1 (61)
+    const LEAGUE_IDS = [39, 140, 78, 135, 61];
     
-    for (const item of fixtures) {
+    for (const leagueId of LEAGUE_IDS) {
+      console.log(`[Pipeline] Syncing league ID: ${leagueId}`);
+      // 1. Fetch upcoming matches
+      const fixtures = await FootballApiService.getUpcomingFixtures(leagueId, 7);
+
+      for (const item of fixtures) {
       try {
         const fixtureId = item.fixture.id;
         
@@ -75,15 +80,16 @@ export class DataPipeline {
               updated_at: new Date().toISOString()
             }, { onConflict: 'match_id, market' });
 
-          if (predError) {
-            console.error(`Error saving prediction for match ${fixtureId}:`, predError);
-          } else {
-            console.log(`[Pipeline] Processed and predicted for ${item.teams.home.name} vs ${item.teams.away.name} (Confidence: ${prediction.confidence_score})`);
+            if (predError) {
+              console.error(`Error saving prediction for match ${fixtureId}:`, predError);
+            } else {
+              console.log(`[Pipeline] Processed and predicted for ${item.teams.home.name} vs ${item.teams.away.name} (Confidence: ${prediction.confidence_score})`);
+            }
           }
-        }
 
-      } catch (err) {
-        console.error(`[Pipeline] Error processing fixture ${item.fixture.id}:`, err);
+        } catch (err) {
+          console.error(`[Pipeline] Error processing fixture ${item.fixture.id}:`, err);
+        }
       }
     }
     console.log('[Pipeline] Sync pipeline finished.');

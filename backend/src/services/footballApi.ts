@@ -72,10 +72,13 @@ export class FootballApiService {
 
     // Real API call
     try {
-      // In a real scenario, you'd calculate from/to dates based on `nextDays`
       const response = await axios.get(`${BASE_URL}/fixtures`, {
         headers: { 'x-apisports-key': API_KEY },
-        params: { league: leagueId, season: new Date().getFullYear(), next: 10 } // Next 10 matches
+        params: {
+          league: leagueId,
+          season: new Date().getFullYear(),
+          next: Math.max(10, nextDays * 5)
+        }
       });
       return response.data.response;
     } catch (error) {

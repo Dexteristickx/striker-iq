@@ -37,6 +37,7 @@ CREATE TABLE public.predictions (
   is_premium BOOLEAN DEFAULT FALSE,
   status TEXT DEFAULT 'PENDING', -- PENDING, WON, LOST, VOID
   features_json JSONB, -- The input data used by the ML model
+  UNIQUE (match_id, market),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
