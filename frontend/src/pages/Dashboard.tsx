@@ -9,7 +9,9 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export const Dashboard: React.FC = () => {
   const [predictions, setPredictions] = useState<any[]>([]);
+  const [historyPredictions, setHistoryPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [sportFilter, setSportFilter] = useState('All Sports');
   const [confidenceFilter, setConfidenceFilter] = useState('All');
   const [activeTab, setActiveTab] = useState<'upcoming' | 'history'>('upcoming');
@@ -34,8 +36,9 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchPredictions = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(`${API_BASE}/api/predictions`);
+        const response = await axios.get(`${API_BASE}/api/predictions?status=upcoming`);
         setPredictions(response.data.data || []);
       } catch (error) {
         console.error("Failed to load predictions", error);
@@ -46,6 +49,23 @@ export const Dashboard: React.FC = () => {
 
     fetchPredictions();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'history' && historyPredictions.length === 0) {
+      const fetchHistory = async () => {
+        setHistoryLoading(true);
+        try {
+          const response = await axios.get(`${API_BASE}/api/predictions?status=history`);
+          setHistoryPredictions(response.data.data || []);
+        } catch (error) {
+          console.error("Failed to load history", error);
+        } finally {
+          setHistoryLoading(false);
+        }
+      };
+      fetchHistory();
+    }
+  }, [activeTab, historyPredictions.length]);
 
   const handleSearch = async () => {
     const hasInput = searchQuery.trim() || searchCountry || searchDate;
@@ -82,74 +102,6 @@ export const Dashboard: React.FC = () => {
     if (e.key === 'Escape') handleClearSearch();
   };
 
-  // Mocked historical settled predictions for the transparent performance log
-  const historicalPicks = [
-    {
-      id: 'h1',
-      home_team: 'Manchester City',
-      away_team: 'Real Madrid',
-      league: 'Champions League',
-      date: '2026-05-26',
-      market: '1X2',
-      prediction: 'HOME_WIN',
-      confidence: 94.2,
-      result: '4 - 0',
-      status: 'WON',
-      odds: 1.65
-    },
-    {
-      id: 'h2',
-      home_team: 'Bayern Munich',
-      away_team: 'Dortmund',
-      league: 'Bundesliga',
-      date: '2026-05-25',
-      market: 'OVER_UNDER_2.5',
-      prediction: 'OVER',
-      confidence: 91.8,
-      result: '3 - 2',
-      status: 'WON',
-      odds: 1.55
-    },
-    {
-      id: 'h3',
-      home_team: 'PSG',
-      away_team: 'Marseille',
-      league: 'Ligue 1',
-      date: '2026-05-24',
-      market: '1X2',
-      prediction: 'HOME_WIN',
-      confidence: 90.5,
-      result: '2 - 0',
-      status: 'WON',
-      odds: 1.42
-    },
-    {
-      id: 'h4',
-      home_team: 'Juventus',
-      away_team: 'Napoli',
-      league: 'Serie A',
-      date: '2026-05-23',
-      market: 'BTTS',
-      prediction: 'YES',
-      confidence: 88.4,
-      result: '1 - 2',
-      status: 'WON',
-      odds: 1.85
-    },
-    {
-      id: 'h5',
-      home_team: 'Liverpool',
-      away_team: 'Aston Villa',
-      league: 'Premier League',
-      date: '2026-05-23',
-      market: '1X2',
-      prediction: 'HOME_WIN',
-      confidence: 92.1,
-      result: '1 - 1',
-      status: 'LOST',
-      odds: 1.50
-    }
-  ];
 
   // Filtering Logic
   const filteredPredictions = predictions.filter(p => {
@@ -446,42 +398,52 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-primary-border bg-[#1B263B]/20 backdrop-blur-md">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-primary-border bg-[#1B263B]/60 text-text-secondary font-bold">
-                  <th className="p-4">Date</th>
-                  <th className="p-4">Match</th>
-                  <th className="p-4">League</th>
-                  <th className="p-4">Market</th>
-                  <th className="p-4">Prediction</th>
-                  <th className="p-4 text-center">AI Confidence</th>
-                  <th className="p-4 text-center">Score</th>
-                  <th className="p-4 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-primary-border/40">
-                {historicalPicks.map(pick => (
-                  <tr key={pick.id} className="hover:bg-[#1B263B]/45 transition-colors text-white font-medium">
-                    <td className="p-4 text-text-secondary font-mono">{pick.date}</td>
-                    <td className="p-4 font-bold">{pick.home_team} vs {pick.away_team}</td>
-                    <td className="p-4 text-text-secondary">{pick.league}</td>
-                    <td className="p-4 font-mono text-xs">{pick.market}</td>
-                    <td className="p-4 font-bold text-accent-green">{pick.prediction.replace('_', ' ')}</td>
-                    <td className="p-4 text-center font-mono text-accent-green font-bold">{pick.confidence}%</td>
-                    <td className="p-4 text-center font-mono">{pick.result}</td>
-                    <td className="p-4 text-center">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wider ${
-                        pick.status === 'WON' 
-                          ? 'bg-accent-green/20 text-accent-green border border-accent-green/30' 
-                          : 'bg-accent-red/20 text-accent-red border border-accent-red/30'
-                      }`}>
-                        {pick.status}
-                      </span>
-                    </td>
+            {historyLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-accent-green"></div>
+              </div>
+            ) : historyPredictions.length > 0 ? (
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-primary-border bg-[#1B263B]/60 text-text-secondary font-bold">
+                    <th className="p-4">Date</th>
+                    <th className="p-4">Match</th>
+                    <th className="p-4">League</th>
+                    <th className="p-4">Market</th>
+                    <th className="p-4">Prediction</th>
+                    <th className="p-4 text-center">AI Confidence</th>
+                    <th className="p-4 text-center">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-primary-border/40">
+                  {historyPredictions.map(pick => (
+                    <tr key={pick.id} className="hover:bg-[#1B263B]/45 transition-colors text-white font-medium">
+                      <td className="p-4 text-text-secondary font-mono">{pick.matches.match_date.slice(0, 10)}</td>
+                      <td className="p-4 font-bold">{pick.matches.home_team} vs {pick.matches.away_team}</td>
+                      <td className="p-4 text-text-secondary">{pick.matches.league_name}</td>
+                      <td className="p-4 font-mono text-xs">{pick.market}</td>
+                      <td className="p-4 font-bold text-accent-green">{pick.prediction_value.replace('_', ' ')}</td>
+                      <td className="p-4 text-center font-mono text-accent-green font-bold">{pick.confidence_score}%</td>
+                      <td className="p-4 text-center">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wider ${
+                          pick.status === 'WON'
+                            ? 'bg-accent-green/20 text-accent-green border border-accent-green/30'
+                            : pick.status === 'LOST'
+                            ? 'bg-accent-red/20 text-accent-red border border-accent-red/30'
+                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                        }`}>
+                          {pick.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="py-20 text-center text-text-secondary">
+                No historical predictions found in the database.
+              </div>
+            )}
           </div>
         </div>
       )}

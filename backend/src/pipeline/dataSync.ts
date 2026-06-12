@@ -26,6 +26,7 @@ export class DataPipeline {
             sport: 'football',
             league_id: item.league.id,
             league_name: item.league.name,
+            country: item.league.country,
             home_team: item.teams.home.name,
             away_team: item.teams.away.name,
             match_date: item.fixture.date,

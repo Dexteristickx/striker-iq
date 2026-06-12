@@ -15,6 +15,7 @@ export interface ApiFixture {
   league: {
     id: number;
     name: string;
+    country: string;
   };
   teams: {
     home: { name: string; id: number };
@@ -51,7 +52,7 @@ export class FootballApiService {
       return [
         {
           fixture: { id: 1001, date: tomorrow.toISOString(), status: { short: 'NS' } },
-          league: { id: leagueId, name: 'Premier League' },
+          league: { id: leagueId, name: 'Premier League', country: 'England' },
           teams: {
             home: { id: 42, name: 'Arsenal' },
             away: { id: 49, name: 'Chelsea' }
@@ -60,7 +61,7 @@ export class FootballApiService {
         },
         {
           fixture: { id: 1002, date: tomorrow.toISOString(), status: { short: 'NS' } },
-          league: { id: leagueId, name: 'Premier League' },
+          league: { id: leagueId, name: 'Premier League', country: 'England' },
           teams: {
             home: { id: 33, name: 'Manchester United' },
             away: { id: 34, name: 'Newcastle' }

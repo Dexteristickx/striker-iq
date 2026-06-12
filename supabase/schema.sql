@@ -15,6 +15,7 @@ CREATE TABLE public.matches (
   sport TEXT DEFAULT 'football',
   league_id INTEGER,
   league_name TEXT,
+  country TEXT,
   home_team TEXT NOT NULL,
   away_team TEXT NOT NULL,
   match_date TIMESTAMP WITH TIME ZONE NOT NULL,
