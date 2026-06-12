@@ -24,15 +24,8 @@ export const Dashboard: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchMode, setSearchMode] = useState(false);
+  const [availableCountries, setAvailableCountries] = useState<string[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const COUNTRIES = [
-    'England','Spain','Germany','Italy','France','Portugal','Netherlands',
-    'Brazil','Argentina','Colombia','Mexico','USA',
-    'Nigeria','South Africa','Ghana','Kenya','Egypt','Morocco',
-    'Saudi Arabia','Japan','Turkey','Russia','Ukraine','Belgium','Scotland',
-    'Champions League','Europa League'
-  ];
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -47,7 +40,17 @@ export const Dashboard: React.FC = () => {
       }
     };
 
+    const fetchCountries = async () => {
+      try {
+        const response = await axios.get(`${API_BASE}/api/countries`);
+        setAvailableCountries(response.data.data || []);
+      } catch (error) {
+        console.error("Failed to load countries", error);
+      }
+    };
+
     fetchPredictions();
+    fetchCountries();
   }, []);
 
   useEffect(() => {
@@ -202,7 +205,7 @@ export const Dashboard: React.FC = () => {
               style={{ color: searchCountry ? 'white' : '#64748b' }}
             >
               <option value="">All Countries</option>
-              {COUNTRIES.map(c => (
+              {availableCountries.map(c => (
                 <option key={c} value={c} style={{ color: 'white', background: '#0D1B2A' }}>{c}</option>
               ))}
             </select>

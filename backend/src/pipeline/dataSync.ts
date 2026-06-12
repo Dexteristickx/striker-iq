@@ -6,8 +6,21 @@ export class DataPipeline {
   static async syncUpcomingMatchesAndPredict() {
     console.log('[Pipeline] Starting sync pipeline for upcoming matches...');
     
-    // Major Leagues to sync: Premier League (39), La Liga (140), Bundesliga (78), Serie A (135), Ligue 1 (61)
-    const LEAGUE_IDS = [39, 140, 78, 135, 61];
+    // Expanded list of global leagues to sync
+    const LEAGUE_IDS = [
+      39, 40,   // England (EPL, Champ)
+      140, 141, // Spain
+      78, 79,   // Germany
+      135, 136, // Italy
+      61, 62,   // France
+      88, 94,   // Netherlands, Portugal
+      71, 128,  // Brazil, Argentina
+      253, 262, // USA, Mexico
+      203, 179, // Turkey, Scotland
+      144, 119, // Belgium, Denmark
+      103, 113, // Norway, Sweden
+      207, 218  // Switzerland, Austria
+    ];
     
     for (const leagueId of LEAGUE_IDS) {
       console.log(`[Pipeline] Syncing league ID: ${leagueId}`);

@@ -12,6 +12,7 @@ export const apiRouter = Router();
 apiRouter.get('/predictions', async (req, res) => {
   const search  = (req.query.search  as string || '').trim().toLowerCase();
   const country = (req.query.country as string || '').trim().toLowerCase();
+  const sport   = (req.query.sport   as string || '').trim().toLowerCase();
   
   // Default to today's date in local system/server time format YYYY-MM-DD
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -57,6 +58,13 @@ apiRouter.get('/predictions', async (req, res) => {
       );
     }
 
+    // Filter by sport
+    if (sport && sport !== 'all sports') {
+      results = results.filter((p: any) =>
+        p.matches?.sport?.toLowerCase() === sport
+      );
+    }
+
     // Filter by date
     if (date) {
       results = results.filter((p: any) => {
@@ -73,6 +81,27 @@ apiRouter.get('/predictions', async (req, res) => {
     }
 
     res.json({ data: results });
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// ──────────────────────────────────────────────────────────
+// GET /api/countries
+// Returns list of unique countries available in database
+// ──────────────────────────────────────────────────────────
+apiRouter.get('/countries', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('matches')
+      .select('country')
+      .not('country', 'is', null);
+
+    if (error) throw error;
+
+    const countries = Array.from(new Set(data.map(m => m.country))).sort();
+    res.json({ data: countries });
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
