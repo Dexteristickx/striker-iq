@@ -15,6 +15,7 @@ CREATE TABLE public.matches (
   sport TEXT DEFAULT 'football',
   league_id INTEGER,
   league_name TEXT,
+  country TEXT,
   home_team TEXT NOT NULL,
   away_team TEXT NOT NULL,
   match_date TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -37,6 +38,7 @@ CREATE TABLE public.predictions (
   is_premium BOOLEAN DEFAULT FALSE,
   status TEXT DEFAULT 'PENDING', -- PENDING, WON, LOST, VOID
   features_json JSONB, -- The input data used by the ML model
+  UNIQUE (match_id, market),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

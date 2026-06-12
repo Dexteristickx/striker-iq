@@ -6,10 +6,28 @@ export class DataPipeline {
   static async syncUpcomingMatchesAndPredict() {
     console.log('[Pipeline] Starting sync pipeline for upcoming matches...');
     
-    // 1. Fetch upcoming matches (using Premier League ID 39 as default for now)
-    const fixtures = await FootballApiService.getUpcomingFixtures(39, 2);
+    // Expanded list of global leagues to sync
+    const LEAGUE_IDS = [
+      39, 40,   // England (EPL, Champ)
+      140, 141, // Spain
+      78, 79,   // Germany
+      135, 136, // Italy
+      61, 62,   // France
+      88, 94,   // Netherlands, Portugal
+      71, 128,  // Brazil, Argentina
+      253, 262, // USA, Mexico
+      203, 179, // Turkey, Scotland
+      144, 119, // Belgium, Denmark
+      103, 113, // Norway, Sweden
+      207, 218  // Switzerland, Austria
+    ];
     
-    for (const item of fixtures) {
+    for (const leagueId of LEAGUE_IDS) {
+      console.log(`[Pipeline] Syncing league ID: ${leagueId}`);
+      // 1. Fetch upcoming matches
+      const fixtures = await FootballApiService.getUpcomingFixtures(leagueId, 7);
+
+      for (const item of fixtures) {
       try {
         const fixtureId = item.fixture.id;
         
@@ -21,6 +39,7 @@ export class DataPipeline {
             sport: 'football',
             league_id: item.league.id,
             league_name: item.league.name,
+            country: item.league.country,
             home_team: item.teams.home.name,
             away_team: item.teams.away.name,
             match_date: item.fixture.date,
@@ -75,15 +94,16 @@ export class DataPipeline {
               updated_at: new Date().toISOString()
             }, { onConflict: 'match_id, market' });
 
-          if (predError) {
-            console.error(`Error saving prediction for match ${fixtureId}:`, predError);
-          } else {
-            console.log(`[Pipeline] Processed and predicted for ${item.teams.home.name} vs ${item.teams.away.name} (Confidence: ${prediction.confidence_score})`);
+            if (predError) {
+              console.error(`Error saving prediction for match ${fixtureId}:`, predError);
+            } else {
+              console.log(`[Pipeline] Processed and predicted for ${item.teams.home.name} vs ${item.teams.away.name} (Confidence: ${prediction.confidence_score})`);
+            }
           }
-        }
 
-      } catch (err) {
-        console.error(`[Pipeline] Error processing fixture ${item.fixture.id}:`, err);
+        } catch (err) {
+          console.error(`[Pipeline] Error processing fixture ${item.fixture.id}:`, err);
+        }
       }
     }
     console.log('[Pipeline] Sync pipeline finished.');

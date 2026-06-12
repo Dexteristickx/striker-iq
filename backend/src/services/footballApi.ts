@@ -15,6 +15,7 @@ export interface ApiFixture {
   league: {
     id: number;
     name: string;
+    country: string;
   };
   teams: {
     home: { name: string; id: number };
@@ -48,22 +49,51 @@ export class FootballApiService {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       
+      const leagueMap: Record<number, { name: string, country: string }> = {
+        39: { name: 'Premier League', country: 'England' },
+        40: { name: 'Championship', country: 'England' },
+        140: { name: 'La Liga', country: 'Spain' },
+        141: { name: 'Segunda Division', country: 'Spain' },
+        78: { name: 'Bundesliga', country: 'Germany' },
+        79: { name: '2. Bundesliga', country: 'Germany' },
+        135: { name: 'Serie A', country: 'Italy' },
+        136: { name: 'Serie B', country: 'Italy' },
+        61: { name: 'Ligue 1', country: 'France' },
+        62: { name: 'Ligue 2', country: 'France' },
+        88: { name: 'Eredivisie', country: 'Netherlands' },
+        94: { name: 'Primeira Liga', country: 'Portugal' },
+        71: { name: 'Serie A', country: 'Brazil' },
+        128: { name: 'Liga Profesional', country: 'Argentina' },
+        253: { name: 'MLS', country: 'USA' },
+        262: { name: 'Liga MX', country: 'Mexico' },
+        203: { name: 'Süper Lig', country: 'Turkey' },
+        179: { name: 'Premiership', country: 'Scotland' },
+        144: { name: 'Jupiler Pro League', country: 'Belgium' },
+        119: { name: 'Superliga', country: 'Denmark' },
+        103: { name: 'Eliteserien', country: 'Norway' },
+        113: { name: 'Allsvenskan', country: 'Sweden' },
+        207: { name: 'Super League', country: 'Switzerland' },
+        218: { name: 'Bundesliga', country: 'Austria' }
+      };
+
+      const league = leagueMap[leagueId] || { name: 'Unknown League', country: 'International' };
+
       return [
         {
-          fixture: { id: 1001, date: tomorrow.toISOString(), status: { short: 'NS' } },
-          league: { id: leagueId, name: 'Premier League' },
+          fixture: { id: leagueId * 1000 + 1, date: tomorrow.toISOString(), status: { short: 'NS' } },
+          league: { id: leagueId, name: league.name, country: league.country },
           teams: {
-            home: { id: 42, name: 'Arsenal' },
-            away: { id: 49, name: 'Chelsea' }
+            home: { id: 1, name: `${league.country} Team A` },
+            away: { id: 2, name: `${league.country} Team B` }
           },
           goals: { home: null, away: null }
         },
         {
-          fixture: { id: 1002, date: tomorrow.toISOString(), status: { short: 'NS' } },
-          league: { id: leagueId, name: 'Premier League' },
+          fixture: { id: leagueId * 1000 + 2, date: tomorrow.toISOString(), status: { short: 'NS' } },
+          league: { id: leagueId, name: league.name, country: league.country },
           teams: {
-            home: { id: 33, name: 'Manchester United' },
-            away: { id: 34, name: 'Newcastle' }
+            home: { id: 3, name: `${league.country} Team C` },
+            away: { id: 4, name: `${league.country} Team D` }
           },
           goals: { home: null, away: null }
         }
@@ -72,10 +102,13 @@ export class FootballApiService {
 
     // Real API call
     try {
-      // In a real scenario, you'd calculate from/to dates based on `nextDays`
       const response = await axios.get(`${BASE_URL}/fixtures`, {
         headers: { 'x-apisports-key': API_KEY },
-        params: { league: leagueId, season: new Date().getFullYear(), next: 10 } // Next 10 matches
+        params: {
+          league: leagueId,
+          season: new Date().getFullYear(),
+          next: Math.max(10, nextDays * 5)
+        }
       });
       return response.data.response;
     } catch (error) {
