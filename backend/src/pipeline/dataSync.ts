@@ -126,7 +126,7 @@ export class DataPipeline {
   }
 
   // Get sample predictions for when Supabase isn't connected
-  static getSamplePredictions() {
+  static getSamplePredictions(): any[] {
     const now = new Date();
     return [
       {

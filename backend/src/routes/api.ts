@@ -17,10 +17,10 @@ apiRouter.get('/predictions', async (req, res) => {
   try {
     if (!supabase) {
       console.log('[API] Supabase not configured, returning sample data');
-      const sampleData = DataPipeline.getSamplePredictions();
+      const sampleData: any[] = DataPipeline.getSamplePredictions();
       
       // Filter sample data
-      let results = sampleData;
+      let results: any[] = sampleData;
       if (search && results.length > 0) {
         results = results.filter((p: any) =>
           p.matches?.home_team?.toLowerCase().includes(search) ||
@@ -55,7 +55,7 @@ apiRouter.get('/predictions', async (req, res) => {
 
     console.log(`[API] Found ${data?.length || 0} predictions from Supabase`);
 
-    let results = data || [];
+    let results: any[] = data || [];
     
     // If no predictions from DB, use sample data
     if (results.length === 0) {
@@ -84,7 +84,7 @@ apiRouter.get('/predictions', async (req, res) => {
   } catch (err) {
     console.error('[API] Error handling /predictions:', err);
     // Fallback to sample data on error
-    const sampleData = DataPipeline.getSamplePredictions();
+    const sampleData: any[] = DataPipeline.getSamplePredictions();
     res.json({ data: sampleData.slice(0, 30) });
   }
 });
