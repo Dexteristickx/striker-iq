@@ -2,9 +2,13 @@ import { FootballApiService } from '../services/footballApi';
 import { PredictionService } from '../services/predictionService';
 import { supabase } from '../config/supabase';
 
-// List of popular league IDs from API-Football - let's start with just a few to test
+// List of popular league IDs from API-Football
 const LEAGUE_IDS = [
-  39,    // England: Premier League (start with just this first!)
+  39,    // England: Premier League
+  140,   // Spain: La Liga
+  78,    // Germany: Bundesliga
+  135,   // Italy: Serie A
+  61,    // France: Ligue 1
 ];
 
 export class DataPipeline {
@@ -12,7 +16,8 @@ export class DataPipeline {
     console.log('[Pipeline] Starting sync pipeline for upcoming matches...');
     
     if (!supabase) {
-      console.warn('[Pipeline] Supabase not configured, skipping sync');
+      console.warn('[Pipeline] Supabase not configured, but will still generate sample predictions');
+      // Even without Supabase, we can return sample data via API
       return;
     }
 
@@ -118,5 +123,60 @@ export class DataPipeline {
     }
     
     console.log('[Pipeline] 🎉 Sync pipeline finished.');
+  }
+
+  // Get sample predictions for when Supabase isn't connected
+  static getSamplePredictions() {
+    const now = new Date();
+    return [
+      {
+        id: '1',
+        match_id: '101',
+        confidence_score: 94.5,
+        market: '1X2',
+        prediction_value: 'HOME_WIN',
+        is_banker: true,
+        is_premium: true,
+        matches: {
+          home_team: 'Manchester City',
+          away_team: 'Arsenal',
+          league_name: 'Premier League',
+          match_date: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+          status: 'SCHEDULED'
+        }
+      },
+      {
+        id: '2',
+        match_id: '102',
+        confidence_score: 91.2,
+        market: '1X2',
+        prediction_value: 'HOME_WIN',
+        is_banker: false,
+        is_premium: true,
+        matches: {
+          home_team: 'Liverpool',
+          away_team: 'Chelsea',
+          league_name: 'Premier League',
+          match_date: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+          status: 'SCHEDULED'
+        }
+      },
+      {
+        id: '3',
+        match_id: '103',
+        confidence_score: 87.8,
+        market: 'OVER_UNDER_2.5',
+        prediction_value: 'OVER',
+        is_banker: false,
+        is_premium: false,
+        matches: {
+          home_team: 'Real Madrid',
+          away_team: 'Barcelona',
+          league_name: 'La Liga',
+          match_date: new Date(now.getTime() + 72 * 60 * 60 * 1000).toISOString(),
+          status: 'SCHEDULED'
+        }
+      }
+    ];
   }
 }
