@@ -1,10 +1,13 @@
 import axios from 'axios';
 
-// This is a mock service mimicking API-Football's structure
 // API Documentation: https://www.api-football.com/documentation-v3
 
-const API_KEY = process.env.API_FOOTBALL_KEY || 'mock_key';
+const API_KEY = process.env.API_FOOTBALL_KEY;
 const BASE_URL = 'https://v3.football.api-sports.io';
+
+if (!API_KEY) {
+  console.warn('WARNING: API_FOOTBALL_KEY not set');
+}
 
 export interface ApiFixture {
   fixture: {
@@ -40,42 +43,15 @@ export interface ApiOdds {
 }
 
 export class FootballApiService {
-  // Simulates fetching upcoming fixtures for a specific league
   static async getUpcomingFixtures(leagueId: number, nextDays: number = 2): Promise<ApiFixture[]> {
-    if (API_KEY === 'mock_key') {
-      console.log(`[Mock] Fetching upcoming fixtures for league ${leagueId}`);
-      // Return dummy data
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      return [
-        {
-          fixture: { id: 1001, date: tomorrow.toISOString(), status: { short: 'NS' } },
-          league: { id: leagueId, name: 'Premier League' },
-          teams: {
-            home: { id: 42, name: 'Arsenal' },
-            away: { id: 49, name: 'Chelsea' }
-          },
-          goals: { home: null, away: null }
-        },
-        {
-          fixture: { id: 1002, date: tomorrow.toISOString(), status: { short: 'NS' } },
-          league: { id: leagueId, name: 'Premier League' },
-          teams: {
-            home: { id: 33, name: 'Manchester United' },
-            away: { id: 34, name: 'Newcastle' }
-          },
-          goals: { home: null, away: null }
-        }
-      ];
+    if (!API_KEY) {
+      console.error('API_FOOTBALL_KEY missing');
+      return [];
     }
-
-    // Real API call
     try {
-      // In a real scenario, you'd calculate from/to dates based on `nextDays`
       const response = await axios.get(`${BASE_URL}/fixtures`, {
         headers: { 'x-apisports-key': API_KEY },
-        params: { league: leagueId, season: new Date().getFullYear(), next: 10 } // Next 10 matches
+        params: { league: leagueId, season: new Date().getFullYear(), next: 20 } // More matches
       });
       return response.data.response;
     } catch (error) {
@@ -84,32 +60,11 @@ export class FootballApiService {
     }
   }
 
-  // Simulates fetching odds for a fixture
   static async getOdds(fixtureId: number): Promise<ApiOdds | null> {
-    if (API_KEY === 'mock_key') {
-      console.log(`[Mock] Fetching odds for fixture ${fixtureId}`);
-      return {
-        fixture: { id: fixtureId },
-        bookmakers: [
-          {
-            id: 1,
-            name: 'Bet365',
-            bets: [
-              {
-                id: 1,
-                name: 'Match Winner',
-                values: [
-                  { value: 'Home', odd: (Math.random() * 2 + 1).toFixed(2) },
-                  { value: 'Draw', odd: (Math.random() * 2 + 2).toFixed(2) },
-                  { value: 'Away', odd: (Math.random() * 3 + 1).toFixed(2) }
-                ]
-              }
-            ]
-          }
-        ]
-      };
+    if (!API_KEY) {
+      console.error('API_FOOTBALL_KEY missing');
+      return null;
     }
-
     try {
       const response = await axios.get(`${BASE_URL}/odds`, {
         headers: { 'x-apisports-key': API_KEY },

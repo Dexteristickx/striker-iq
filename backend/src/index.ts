@@ -24,6 +24,11 @@ app.get('/health', (req, res) => {
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  
+  // Trigger initial sync after server starts
+  setTimeout(() => {
+    DataPipeline.syncUpcomingMatchesAndPredict();
+  }, 1000);
 });
 
 // Setup cron jobs
